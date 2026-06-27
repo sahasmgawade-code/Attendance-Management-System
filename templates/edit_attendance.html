@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card shadow">
+
+    <div class="card-header bg-warning text-dark">
+        <h4 class="mb-0">✏️ Edit Past Attendance</h4>
+    </div>
+
+    <div class="card-body">
+
+        <a href="{{ url_for('home.home') }}"
+            class="btn btn-outline-secondary mb-4">
+            ← Back to Dashboard
+        </a>
+
+        {% if request.args.get('success') %}
+        <div class="alert alert-success">
+            ✅ Attendance updated successfully!
+        </div>
+        {% endif %}
+
+        {% if error %}
+        <div class="alert alert-danger">
+            ❌ {{ error }}
+        </div>
+        {% endif %}
+
+        <!-- Date Dropdown -->
+        <form method="GET"
+            action="{{ url_for('edit.edit_attendance') }}">
+
+            <div class="mb-4">
+
+                <label class="form-label fw-bold">
+                    Select Date
+                </label>
+
+                <select
+                    name="date"
+                    class="form-select"
+                    onchange="this.form.submit()">
+
+                    <option value="">-- Select a Date --</option>
+
+                    {% for date in dates %}
+                    <option
+                        value="{{ date }}"
+                        {% if selected_date == date %}selected{% endif %}>
+                        {{ date }}
+                    </option>
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+        </form>
+
+        <!-- Attendance Table -->
+        {% if students %}
+
+        <form method="POST"
+            action="{{ url_for('edit.save_attendance') }}">
+
+            <input
+                type="hidden"
+                name="date"
+                value="{{ selected_date }}">
+
+            <table class="table table-bordered table-hover">
+
+                <thead class="table-dark">
+                    <tr>
+                        <th>URN</th>
+                        <th>Student Name</th>
+                        <th class="text-center">Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for student in students %}
+                    <tr class="{% if student.status == 'A' %}table-danger{% else %}table-success{% endif %}">
+
+                        <td>{{ student.urn }}</td>
+                        <td>{{ student.name }}</td>
+                        <td class="text-center">
+
+                            <select
+                                name="status_{{ student.urn }}"
+                                class="form-select form-select-sm w-auto mx-auto">
+
+                                <option
+                                    value="P"
+                                    {% if student.status == 'P' %}selected{% endif %}>
+                                    ✅ Present
+                                </option>
+
+                                <option
+                                    value="A"
+                                    {% if student.status == 'A' %}selected{% endif %}>
+                                    ❌ Absent
+                                </option>
+
+                            </select>
+
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+
+            <button
+                type="submit"
+                class="btn btn-warning btn-lg w-100 mt-3">
+                💾 Save Changes
+            </button>
+
+        </form>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card shadow">
+
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">Attendance Reports</h4>
+    </div>
+
+    <div class="card-body">
+
+        <a href="{{ url_for('home.home') }}" class="btn btn-outline-secondary mb-4">
+            ← Back to Dashboard
+        </a>
+
+        <!-- Student Dropdown -->
+        <form method="GET" action="{{ url_for('reports.reports') }}">
+
+            <div class="mb-4">
+
+                <label class="form-label fw-bold">Select Student</label>
+
+                <select
+                    name="urn"
+                    class="form-select"
+                    onchange="this.form.submit()">
+
+                    <option value="">-- Select a Student --</option>
+
+                    {% for student in students %}
+
+                    <option
+                        value="{{ student.urn }}"
+                        {% if selected_urn == student.urn|string %}selected{% endif %}
+                        {% if student.defaulter %}style="color: red; font-weight: bold;"{% endif %}>
+
+                        {{ student.name }}
+                        {% if student.defaulter %}⚠️{% endif %}
+                        ({{ student.attendance }}%)
+
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+        </form>
+
+        <!-- Student Analysis -->
+        {% if selected_student %}
+
+        <div class="card mb-4">
+
+            <div class="card-header {% if selected_student.defaulter %}bg-danger{% else %}bg-success{% endif %} text-white">
+                <h5 class="mb-0">{{ selected_student.name }}</h5>
+            </div>
+
+            <div class="card-body">
+
+                <div class="row align-items-center">
+
+                    <!-- Stats -->
+                    <div class="col-md-4">
+
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>URN</th>
+                                <td>{{ selected_student.urn }}</td>
+                            </tr>
+                            <tr>
+                                <th>Present</th>
+                                <td class="text-success fw-bold">{{ selected_student.present }}</td>
+                            </tr>
+                            <tr>
+                                <th>Working Days</th>
+                                <td>{{ selected_student.working }}</td>
+                            </tr>
+                            <tr>
+                                <th>Attendance %</th>
+                                <td class="{% if selected_student.defaulter %}text-danger{% else %}text-success{% endif %} fw-bold">
+                                    {{ selected_student.attendance }}%
+                                </td>
+                            </tr>
+                        </table>
+
+                        {% if selected_student.defaulter %}
+                        <div class="alert alert-danger mt-2">
+                            ⚠️ Below 75% — Defaulter
+                        </div>
+                        {% endif %}
+
+                    </div>
+
+                    <!-- Pie Chart -->
+                    <div class="col-md-4 text-center">
+                        <canvas id="attendanceChart" width="250" height="250"></canvas>
+                    </div>
+
+                    <!-- Absent Dates -->
+                    <div class="col-md-4">
+
+                        <strong class="text-danger">Absent Dates:</strong>
+
+                        {% if absent_dates %}
+
+                        <ul class="mt-2">
+                            {% for date in absent_dates %}
+                            <li>{{ date }}</li>
+                            {% endfor %}
+                        </ul>
+
+                        {% else %}
+
+                        <p class="text-success mt-2">No absences recorded.</p>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Chart.js Script -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <script>
+            // @ts-nocheck
+            const ctx = document.getElementById('attendanceChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Present', 'Absent'],
+                    datasets: [{
+                        data: [
+                            {{ selected_student.attendance }},
+                            {{ 100 - selected_student.attendance }}
+                        ],
+                        backgroundColor: ['#198754', '#dc3545'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.parsed.toFixed(2) + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        </script>
+
+        {% endif %}
+
+        <!-- Defaulters Table -->
+        {% if defaulters %}
+
+        <hr>
+
+        <h5 class="text-danger">⚠️ Defaulters — Below 75%</h5>
+
+        <table class="table table-bordered table-hover mt-3">
+
+            <thead class="table-danger">
+                <tr>
+                    <th>URN</th>
+                    <th>Student Name</th>
+                    <th>Present</th>
+                    <th>Working Days</th>
+                    <th>Attendance %</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for student in defaulters %}
+                <tr>
+                    <td>{{ student.urn }}</td>
+                    <td>{{ student.name }}</td>
+                    <td>{{ student.present }}</td>
+                    <td>{{ student.working }}</td>
+                    <td class="text-danger fw-bold">{{ student.attendance }}%</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

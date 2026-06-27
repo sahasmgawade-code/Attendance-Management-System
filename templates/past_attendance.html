@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card shadow">
+
+    <div class="card-header bg-info text-white">
+        <h4 class="mb-0">📅 Add Past Attendance</h4>
+    </div>
+
+    <div class="card-body">
+
+        <a href="{{ url_for('home.home') }}"
+            class="btn btn-outline-secondary mb-4">
+            ← Back to Dashboard
+        </a>
+
+        {% if success %}
+        <div class="alert alert-success">
+            ✅ {{ success }}
+        </div>
+        {% endif %}
+
+        {% if error %}
+        <div class="alert alert-danger">
+            ❌ {{ error }}
+        </div>
+        {% endif %}
+
+        {% if unknown_morning or unknown_afternoon %}
+        <div class="alert alert-warning mt-3">
+
+            <h5>⚠️ Unknown Students Found</h5>
+            <p>
+                The following students were not found in
+                Master Data and have not been recorded.
+            </p>
+
+            {% if unknown_morning %}
+            <strong>Morning Batch:</strong>
+            <ul>
+                {% for w in unknown_morning %}
+                <li>{{ w | replace("Student '", "") | replace("' not found in Master Data.", "") }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+            {% if unknown_afternoon %}
+            <strong>Afternoon Batch:</strong>
+            <ul>
+                {% for w in unknown_afternoon %}
+                <li>{{ w | replace("Student '", "") | replace("' not found in Master Data.", "") }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+        </div>
+        {% endif %}
+
+        <!-- Form -->
+        <form
+            method="POST"
+            action="{{ url_for('past.process_past_attendance') }}"
+            enctype="multipart/form-data">
+
+            <!-- Date Picker -->
+            <div class="mb-4">
+
+                <label class="form-label fw-bold">
+                    Select Past Date
+                </label>
+
+                <input
+                    type="date"
+                    name="date"
+                    class="form-control"
+                    max="{{ today }}"
+                    required>
+
+            </div>
+
+            <!-- Morning Batch -->
+            <div class="mb-4">
+
+                <label class="form-label fw-bold">
+                    Morning Batch CSV
+                </label>
+
+                <input
+                    type="file"
+                    name="morning_batch"
+                    class="form-control"
+                    accept=".csv"
+                    required>
+
+            </div>
+
+            <!-- Afternoon Batch -->
+            <div class="mb-4">
+
+                <label class="form-label fw-bold">
+                    Afternoon Batch CSV
+                </label>
+
+                <input
+                    type="file"
+                    name="afternoon_batch"
+                    class="form-control"
+                    accept=".csv"
+                    required>
+
+            </div>
+
+            <button
+                type="submit"
+                class="btn btn-info text-white btn-lg w-100">
+                📅 Add Attendance
+            </button>
+
+        </form>
+
+        <!-- Summary -->
+        {% if summary %}
+
+        <hr class="mt-4">
+
+        <h5>Summary for Added Date</h5>
+
+        <table class="table table-bordered mt-3">
+            <tr>
+                <th>Total Students</th>
+                <td>{{ summary.total }}</td>
+            </tr>
+            <tr>
+                <th>Present</th>
+                <td class="text-success fw-bold">{{ summary.present }}</td>
+            </tr>
+            <tr>
+                <th>Absent</th>
+                <td class="text-danger fw-bold">{{ summary.absent }}</td>
+            </tr>
+        </table>
+
+        {% if summary.absent_students %}
+        <strong class="text-danger">Absent Students:</strong>
+        <ul class="mt-2">
+            {% for name in summary.absent_students %}
+            <li>{{ name }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}
