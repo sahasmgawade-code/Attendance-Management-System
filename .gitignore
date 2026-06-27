@@ -11,6 +11,7 @@ env/
 .venv/
 
 # Uploaded Files
+static/
 uploads/
 
 # Logs
