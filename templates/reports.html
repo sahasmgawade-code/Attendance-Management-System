@@ -13,7 +13,10 @@
         <a href="{{ url_for('home.home') }}" class="btn btn-outline-secondary mb-4">
             ← Back to Dashboard
         </a>
-
+        <a href="{{ url_for('reports.download_report') }}"
+            class="btn btn-danger mb-4 ms-2">
+            Download PDF Report
+        </a>
         <!-- Student Dropdown -->
         <form method="GET" action="{{ url_for('reports.reports') }}">
 
@@ -36,7 +39,7 @@
                         {% if student.defaulter %}style="color: red; font-weight: bold;"{% endif %}>
 
                         {{ student.name }}
-                        {% if student.defaulter %}⚠️{% endif %}
+                        {% if student.defaulter %} {% endif %}
                         ({{ student.attendance }}%)
 
                     </option>
@@ -88,7 +91,7 @@
 
                         {% if selected_student.defaulter %}
                         <div class="alert alert-danger mt-2">
-                            ⚠️ Below 75% — Defaulter
+                            Below 75% — Defaulter
                         </div>
                         {% endif %}
 
@@ -167,7 +170,7 @@
 
         <hr>
 
-        <h5 class="text-danger">⚠️ Defaulters — Below 75%</h5>
+        <h5 class="text-danger">Defaulters — Below 75%</h5>
 
         <table class="table table-bordered table-hover mt-3">
 
