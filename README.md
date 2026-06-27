@@ -14,7 +14,6 @@ A Flask-based web application for managing student attendance at Ajeenkya DY Pat
 ## Setup
 
 1. Clone the repository
-   git clone https://github.com/yourusername/AttendanceManagementSystem.git
 
 2. Install dependencies
    pip install -r requirements.txt
@@ -37,3 +36,6 @@ A Flask-based web application for managing student attendance at Ajeenkya DY Pat
 - config/        — Settings
 - models/        — Data models
 - tests/         — Test scripts
+
+## Future Improvements
+- SMS & Email Updates.
