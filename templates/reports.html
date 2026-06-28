@@ -16,74 +16,94 @@
             </a>
         </div>
 
-                <form method="GET" action="{{ url_for('reports.reports') }}">
+<div class="mb-4 position-relative">
 
-            <div class="mb-4">
+            <label class="form-label fw-bold">Search Student</label>
 
-                <label class="form-label fw-bold">Search Student</label>
+            <!-- Search Box -->
+            <input
+                type="text"
+                id="studentSearch"
+                class="form-control form-control-lg"
+                placeholder="🔍  Search student by name..."
+                oninput="filterStudents()"
+                autocomplete="off">
 
-                <!-- Search Box -->
-                <input
-                    type="text"
-                    id="studentSearch"
-                    class="form-control mb-2"
-                    placeholder="Type name to search..."
-                    onkeyup="filterStudents()"
-                    autocomplete="off">
-
-                <!-- Dropdown -->
-                <select
-                    name="urn"
-                    id="studentSelect"
-                    class="form-select"
-                    onchange="this.form.submit()"
-                    size="5"
-                    style="height: auto;">
-
-                    <option value="">-- Select a Student --</option>
-
-                    {% for student in students %}
-                    <option
-                        value="{{ student.urn }}"
-                        data-name="{{ student.name | lower }}"
-                        {% if selected_urn == student.urn|string %}selected{% endif %}
-                        {% if student.defaulter %}style="color: red; font-weight: bold;"{% endif %}>
-                        {{ student.name }} ({{ student.attendance }}%)
-                        {% if student.defaulter %}{% endif %}
-                    </option>
-                    {% endfor %}
-
-                </select>
-
-                <div class="form-text text-muted mt-1">
-                    <span id="studentCount">{{ students|length }}</span> students total.
-                    Red = below 75% attendance.
-                </div>
-
+            <!-- Dropdown Results -->
+            <div id="searchResults"
+                class="border rounded shadow-sm bg-white position-absolute w-100"
+                style="display:none; max-height: 280px; overflow-y: auto; z-index: 999; top: 100%;">
             </div>
 
-        </form>
+            <div class="form-text text-muted mt-1">
+                <span id="studentCount">{{ students|length }}</span> students total.
+                <span class="text-danger">●</span> Red = below 75% attendance.
+            </div>
+
+        </div>
 
         <script>
+            const allStudents = [
+                {% for student in students %}
+                {
+                    urn: "{{ student.urn }}",
+                    name: "{{ student.name }}",
+                    nameLower: "{{ student.name | lower }}",
+                    attendance: "{{ student.attendance }}",
+                    defaulter: {{ 'true' if student.defaulter else 'false' }}
+                },
+                {% endfor %}
+            ];
+
             function filterStudents() {
-                const query = document.getElementById('studentSearch').value.toLowerCase();
-                const select = document.getElementById('studentSelect');
-                const options = select.querySelectorAll('option');
-                let visibleCount = 0;
+                const query = document.getElementById('studentSearch').value.toLowerCase().trim();
+                const resultsBox = document.getElementById('searchResults');
 
-                options.forEach(option => {
-                    if (!option.value) return; // skip the "-- Select --" option
-                    const name = option.getAttribute('data-name') || '';
-                    if (name.includes(query)) {
-                        option.style.display = '';
-                        visibleCount++;
-                    } else {
-                        option.style.display = 'none';
-                    }
-                });
+                if (!query) {
+                    resultsBox.style.display = 'none';
+                    document.getElementById('studentCount').textContent = allStudents.length;
+                    return;
+                }
 
-                document.getElementById('studentCount').textContent = visibleCount;
+                const matches = allStudents.filter(s => s.nameLower.includes(query));
+
+                document.getElementById('studentCount').textContent = matches.length;
+
+                if (matches.length === 0) {
+                    resultsBox.innerHTML = '<div class="px-3 py-2 text-muted">No students found.</div>';
+                    resultsBox.style.display = 'block';
+                    return;
+                }
+
+                resultsBox.innerHTML = matches.map(s => `
+                    <a href="/reports?urn=${s.urn}"
+                        class="d-flex justify-content-between align-items-center px-3 py-2 text-decoration-none border-bottom"
+                        style="color: ${s.defaulter ? '#dc3545' : '#212529'};"
+                        onmouseover="this.style.background='#f0f0f0'"
+                        onmouseout="this.style.background='white'">
+                        <span style="font-weight: ${s.defaulter ? 'bold' : 'normal'}">
+                            ${s.name}
+                        </span>
+                        <span class="badge ${s.defaulter ? 'bg-danger' : 'bg-success'}">
+                            ${s.attendance}%
+                        </span>
+                    </a>
+                `).join('');
+
+                resultsBox.style.display = 'block';
             }
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!document.getElementById('studentSearch').contains(e.target)) {
+                    document.getElementById('searchResults').style.display = 'none';
+                }
+            });
+
+            // Reopen on focus if text exists
+            document.getElementById('studentSearch').addEventListener('focus', function() {
+                if (this.value.trim()) filterStudents();
+            });
         </script>
 
         <!-- Student Analysis -->
@@ -170,6 +190,8 @@
 
         <script>
             // @ts-nocheck
+            /* eslint-disable */
+            // jshint ignore: start
             const ctx = document.getElementById('attendanceChart').getContext('2d');
             new Chart(ctx, {
                 type: 'pie',
@@ -208,31 +230,31 @@
 
         <h5 class="text-danger">Defaulters — Below 75%</h5>
         <div class="table-responsive-wrapper">
-        <table class="table table-bordered table-hover mt-3">
+            <table class="table table-bordered table-hover mt-3">
 
-            <thead class="table-danger">
-                <tr>
-                    <th>URN</th>
-                    <th>Student Name</th>
-                    <th>Present</th>
-                    <th>Working Days</th>
-                    <th>Attendance %</th>
-                </tr>
-            </thead>
+                <thead class="table-danger">
+                    <tr>
+                        <th>URN</th>
+                        <th>Student Name</th>
+                        <th>Present</th>
+                        <th>Working Days</th>
+                        <th>Attendance %</th>
+                    </tr>
+                </thead>
 
-            <tbody>
-                {% for student in defaulters %}
-                <tr>
-                    <td>{{ student.urn }}</td>
-                    <td>{{ student.name }}</td>
-                    <td>{{ student.present }}</td>
-                    <td>{{ student.working }}</td>
-                    <td class="text-danger fw-bold">{{ student.attendance }}%</td>
-                </tr>
-                {% endfor %}
-            </tbody>
+                <tbody>
+                    {% for student in defaulters %}
+                    <tr>
+                        <td>{{ student.urn }}</td>
+                        <td>{{ student.name }}</td>
+                        <td>{{ student.present }}</td>
+                        <td>{{ student.working }}</td>
+                        <td class="text-danger fw-bold">{{ student.attendance }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
 
-        </table>
+            </table>
         </div>
         {% endif %}
 

@@ -1,5 +1,5 @@
 import os
-
+from datetime import datetime
 from flask import Blueprint
 from flask import request
 from flask import render_template
@@ -78,7 +78,8 @@ def process_attendance():
                 ],
                 unknown_morning=[],
                 unknown_afternoon=[],
-                summary=None                
+                summary=None,
+                today=datetime.now().strftime("%A, %d %B %Y")                
             )
     # ------------------------------------------
     # Execute Workflow
@@ -109,7 +110,8 @@ def process_attendance():
             errors=[str(e)],
             unknown_morning=[],
             unknown_afternoon=[],
-            summary=None
+            summary=None,
+            today=datetime.now().strftime("%A, %d %B %Y")
         )
 
     # ------------------------------------------
@@ -132,7 +134,8 @@ def process_attendance():
                 attendance_exists = True,
                 unknown_morning=[],
                 unknown_afternoon=[],
-                summary = None
+                summary = None,
+                today=datetime.now().strftime("%A, %d %B %Y")
             )
 
         # --------------------------------------
@@ -157,7 +160,8 @@ def process_attendance():
             attendance_exists=False,
             unknown_morning=[],
             unknown_afternoon=[],
-            summary = None
+            summary = None,
+            today=datetime.now().strftime("%A, %d %B %Y")            
         )
     # ------------------------------------------
     # Success
@@ -171,5 +175,6 @@ def process_attendance():
         attendance_exists=False,
         unknown_morning=result.get("unknown_morning", []),
         unknown_afternoon=result.get("unknown_afternoon", []),
-        summary = result.get("summary")
+        summary = result.get("summary"),
+        today=datetime.now().strftime("%A, %d %B %Y")
     )

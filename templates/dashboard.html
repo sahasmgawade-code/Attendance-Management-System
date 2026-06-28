@@ -149,30 +149,21 @@
             <button type="submit" class="btn btn-success btn-lg w-100" id="processBtn">
                 Process Attendance
             </button>
-
-            <script>
-                document.querySelector('form[action="{{ url_for('attendance.process_attendance') }}"]')
-                    .addEventListener('submit', function () {
-                        const btn = document.getElementById('processBtn');
-                        btn.disabled = true;
-                        btn.innerHTML = `
+        </form>
+        <script>
+            document.getElementById('processBtn').closest('form')
+                .addEventListener('submit', function () {
+                    const btn = document.getElementById('processBtn');
+                    btn.disabled = true;
+                    btn.innerHTML = `
                             <span class="spinner-border spinner-border-sm me-2" role="status"></span>
                             Processing...
                         `;
-                    });
-            </script>
-        </form>
+                });
+        </script>
+
 
         <hr>
-        <a href="{{ url_for('reports.reports') }}" class="btn btn-outline-primary w-100 mb-4">
-            View Reports
-        </a>
-        <a href="{{ url_for('edit.edit_attendance') }}" class="btn btn-outline-warning w-100 mb-4">
-            Edit Past Attendance
-        </a>
-        <a href="{{ url_for('past.past_attendance') }}" class="btn btn-outline-info w-100 mb-4">
-            Add Past Attendance
-        </a>
         <h5>Today's Summary</h5>
 
         {% if summary %}
