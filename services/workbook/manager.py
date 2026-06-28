@@ -18,16 +18,16 @@ class WorkbookManager:
     def get_registered_workbook(self):
         """
         Returns the registered workbook path.
-        Returns None if no workbook is registered.
+        Returns None if no workbook is registered
+        or if the file no longer exists on disk.
         """
 
         workbook = self.settings.get("master_workbook", "")
 
-        if workbook:
+        if workbook and Path(workbook).exists():
             return Path(workbook)
 
         return None
-
     def workbook_exists(self):
         """
         Checks whether the registered workbook exists.

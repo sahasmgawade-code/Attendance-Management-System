@@ -10,10 +10,6 @@
 
     <div class="card-body">
 
-        <a href="{{ url_for('home.home') }}" class="btn btn-outline-secondary mb-4">
-            ← Back to Dashboard
-        </a>
-
         {% if request.args.get('success') %}
         <div class="alert alert-success">
             Attendance updated successfully!

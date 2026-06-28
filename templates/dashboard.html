@@ -4,14 +4,15 @@
 
 <div class="card shadow">
 
-    <div class="card-header bg-primary text-white">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center flex-wrap gap-2">
 
-        <h4 class="mb-0">
-            Dashboard
-        </h4>
+        <h4 class="mb-0">Dashboard</h4>
+
+        <span class="badge bg-light text-dark fs-6">
+            📅 {{ today }}
+        </span>
 
     </div>
-
     <div class="card-body">
         {% if success %}
 
@@ -145,12 +146,21 @@
 
             </div>
 
-            <button type="submit" class="btn btn-success btn-lg w-100">
-
+            <button type="submit" class="btn btn-success btn-lg w-100" id="processBtn">
                 Process Attendance
-
             </button>
 
+            <script>
+                document.querySelector('form[action="{{ url_for('attendance.process_attendance') }}"]')
+                    .addEventListener('submit', function () {
+                        const btn = document.getElementById('processBtn');
+                        btn.disabled = true;
+                        btn.innerHTML = `
+                            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                            Processing...
+                        `;
+                    });
+            </script>
         </form>
 
         <hr>

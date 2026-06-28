@@ -3,6 +3,7 @@ from flask import Blueprint, render_template, request, redirect, url_for
 from services.workbook.manager import WorkbookManager
 from services.workbook.loader import WorkbookLoader
 from services.workbook.validator import WorkbookValidator
+from datetime import datetime
 from flask import send_file
 
 
@@ -25,7 +26,8 @@ def home():
         attendance_exists=False,
         unknown_morning=[],
         unknown_afternoon=[],
-        summary=None
+        summary=None,
+        today=datetime.now().strftime("%A, %d %B %Y")
     )
 
 
