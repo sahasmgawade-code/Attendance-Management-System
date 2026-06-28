@@ -49,7 +49,7 @@
                         {% if selected_urn == student.urn|string %}selected{% endif %}
                         {% if student.defaulter %}style="color: red; font-weight: bold;"{% endif %}>
                         {{ student.name }} ({{ student.attendance }}%)
-                        {% if student.defaulter %}⚠{% endif %}
+                        {% if student.defaulter %}{% endif %}
                     </option>
                     {% endfor %}
 
