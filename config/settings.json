@@ -1,9 +1,0 @@
-{
-    "school_name": "ABC School",
-    "student_sheet": "Student Details",
-    "attendance_sheet": "Attendance Details",
-    "date_format": "%d-%m-%Y",
-    "sms_enabled": false,
-    "debug": true,
-    "master_workbook": "uploads/master\\Sample Data.xlsm"
-}
