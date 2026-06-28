@@ -10,8 +10,7 @@
 
     <div class="card-body">
 
-        <a href="{{ url_for('home.home') }}"
-            class="btn btn-outline-secondary mb-4">
+        <a href="{{ url_for('home.home') }}" class="btn btn-outline-secondary mb-4">
             ← Back to Dashboard
         </a>
 
@@ -27,95 +26,74 @@
         </div>
         {% endif %}
 
-        <!-- Date Dropdown -->
-        <form method="GET"
-            action="{{ url_for('edit.edit_attendance') }}">
-
+        <!-- Date Picker -->
+        <form method="GET" action="{{ url_for('edit.edit_attendance') }}">
             <div class="mb-4">
+                <label class="form-label fw-bold">Select Date</label>
 
-                <label class="form-label fw-bold">
-                    Select Date
-                </label>
+                <div class="d-flex gap-2">
+                    <input type="date" name="date" class="form-control" value="{{ picker_value }}" min="{{ min_date }}"
+                        max="{{ max_date }}" {% if not dates %}disabled{% endif %}>
+                    <button type="submit" class="btn btn-warning px-4 text-nowrap">Load</button>
+                </div>
 
-                <select
-                    name="date"
-                    class="form-select"
-                    onchange="this.form.submit()">
-
-                    <option value="">-- Select a Date --</option>
-
-                    {% for date in dates %}
-                    <option
-                        value="{{ date }}"
-                        {% if selected_date == date %}selected{% endif %}>
-                        {{ date }}
-                    </option>
-                    {% endfor %}
-
-                </select>
-
+                {% if not dates %}
+                <div class="form-text text-muted mt-1">No attendance dates recorded yet.</div>
+                {% else %}
+                <div class="form-text text-muted mt-1">
+                    Only dates with recorded attendance can be selected
+                    ({{ dates | min }} to {{ dates | max }}).
+                </div>
+                {% endif %}
             </div>
-
         </form>
-
         <!-- Attendance Table -->
         {% if students %}
 
-        <form method="POST"
-            action="{{ url_for('edit.save_attendance') }}">
+        <form method="POST" action="{{ url_for('edit.save_attendance') }}">
 
-            <input
-                type="hidden"
-                name="date"
-                value="{{ selected_date }}">
+            <input type="hidden" name="date" value="{{ selected_date }}">
+            <div class="table-responsive-wrapper">
+                <table class="table table-bordered table-hover">
 
-            <table class="table table-bordered table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>URN</th>
+                            <th>Student Name</th>
+                            <th class="text-center">Status</th>
+                        </tr>
+                    </thead>
 
-                <thead class="table-dark">
-                    <tr>
-                        <th>URN</th>
-                        <th>Student Name</th>
-                        <th class="text-center">Status</th>
-                    </tr>
-                </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr class="{% if student.status == 'A' %}table-danger{% else %}table-success{% endif %}">
 
-                <tbody>
-                    {% for student in students %}
-                    <tr class="{% if student.status == 'A' %}table-danger{% else %}table-success{% endif %}">
+                            <td>{{ student.urn }}</td>
+                            <td>{{ student.name }}</td>
+                            <td class="text-center">
 
-                        <td>{{ student.urn }}</td>
-                        <td>{{ student.name }}</td>
-                        <td class="text-center">
+                                <select name="status_{{ student.urn }}"
+                                    class="form-select form-select-sm w-auto mx-auto">
 
-                            <select
-                                name="status_{{ student.urn }}"
-                                class="form-select form-select-sm w-auto mx-auto">
+                                    <option value="P" {% if student.status=='P' %}selected{% endif %}>
+                                        Present
+                                    </option>
 
-                                <option
-                                    value="P"
-                                    {% if student.status == 'P' %}selected{% endif %}>
-                                    Present
-                                </option>
+                                    <option value="A" {% if student.status=='A' %}selected{% endif %}>
+                                        Absent
+                                    </option>
 
-                                <option
-                                    value="A"
-                                    {% if student.status == 'A' %}selected{% endif %}>
-                                    Absent
-                                </option>
+                                </select>
 
-                            </select>
+                            </td>
 
-                        </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
 
-                    </tr>
-                    {% endfor %}
-                </tbody>
-
-            </table>
-
-            <button
-                type="submit"
-                class="btn btn-warning btn-lg w-100 mt-3">
+                </table>
+            </div>
+            <button type="submit" class="btn btn-warning btn-lg w-100 mt-3">
                 Save Changes
             </button>
 

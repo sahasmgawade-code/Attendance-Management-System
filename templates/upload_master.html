@@ -4,32 +4,88 @@
 
 <div class="card shadow">
 
-    <div class="card-header bg-danger text-white">
-
-        <h4 class="mb-0">
-
-            Master Workbook Required
-
-        </h4>
-
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">📋 Upload Master Workbook</h4>
     </div>
 
     <div class="card-body">
 
-        <p>
+        <!-- Error -->
+        {% if error %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Upload Failed:</strong> {{ error }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endif %}
 
-            No Master Workbook has been registered.
+        <!-- Info Box -->
+        <div class="alert alert-info">
+            <h6 class="fw-bold">Before uploading, make sure your workbook has:</h6>
+            <ul class="mb-0">
+                <li>A sheet named <strong>Student Details</strong> with columns: URN, Student Name, Student Email, Student Phone, Parent Phone, Present Count, Working Days, Attendance %</li>
+                <li>A sheet named <strong>Attendance Details</strong> with columns: URN, Student Name</li>
+                <li>File format: <strong>.xlsx</strong> or <strong>.xlsm</strong></li>
+            </ul>
+        </div>
 
-        </p>
+        <!-- Upload Form -->
+        <form
+            action="{{ url_for('home.upload_master') }}"
+            method="POST"
+            enctype="multipart/form-data"
+            id="uploadForm">
 
-        <button class="btn btn-primary">
+            <div class="mb-4">
+                <label class="form-label fw-bold">Select Master Workbook</label>
 
-            Upload Master Workbook
+                <input
+                    type="file"
+                    name="master_workbook"
+                    class="form-control form-control-lg"
+                    accept=".xlsm,.xlsx"
+                    required
+                    id="fileInput"
+                    onchange="showFileName(this)">
 
-        </button>
+                <div class="form-text text-muted">Accepted formats: .xlsx, .xlsm</div>
+            </div>
+
+            <!-- File preview -->
+            <div id="filePreview" class="alert alert-secondary d-none mb-4">
+                📄 Selected: <strong id="selectedFileName"></strong>
+            </div>
+
+            <button
+                type="submit"
+                class="btn btn-primary btn-lg w-100"
+                id="uploadBtn">
+                Upload Workbook
+            </button>
+
+        </form>
 
     </div>
 
 </div>
+
+<script>
+    function showFileName(input) {
+        const preview = document.getElementById('filePreview');
+        const nameEl = document.getElementById('selectedFileName');
+        if (input.files && input.files[0]) {
+            nameEl.textContent = input.files[0].name;
+            preview.classList.remove('d-none');
+        }
+    }
+
+    document.getElementById('uploadForm').addEventListener('submit', function () {
+        const btn = document.getElementById('uploadBtn');
+        btn.disabled = true;
+        btn.textContent = 'Uploading...';
+    });
+</script>
+
+<!-- Bootstrap JS for dismissible alert -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
 
 {% endblock %}

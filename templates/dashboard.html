@@ -105,14 +105,14 @@
         </div>
 
         {% endif %}
-        <div class="alert alert-success">
-
-            <strong>Master Workbook Loaded</strong>
-
-            <br><br>
-
-            {{ workbook }}
-
+        <div class="alert alert-success d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <strong>Master Workbook Loaded</strong><br>
+                {{ workbook }}
+            </div>
+            <a href="{{ url_for('home.upload_master') }}" class="btn btn-sm btn-outline-success">
+                Change Workbook
+            </a>
         </div>
 
         <hr>
@@ -163,25 +163,26 @@
         <h5>Today's Summary</h5>
 
         {% if summary %}
+        <div class="table-responsive-wrapper">
+            <table class="table table-bordered">
 
-        <table class="table table-bordered">
+                <tr>
+                    <th>Total Students</th>
+                    <td>{{ summary.total }}</td>
+                </tr>
 
-            <tr>
-                <th>Total Students</th>
-                <td>{{ summary.total }}</td>
-            </tr>
+                <tr>
+                    <th>Present</th>
+                    <td class="text-success fw-bold">{{ summary.present }}</td>
+                </tr>
 
-            <tr>
-                <th>Present</th>
-                <td class="text-success fw-bold">{{ summary.present }}</td>
-            </tr>
+                <tr>
+                    <th>Absent</th>
+                    <td class="text-danger fw-bold">{{ summary.absent }}</td>
+                </tr>
 
-            <tr>
-                <th>Absent</th>
-                <td class="text-danger fw-bold">{{ summary.absent }}</td>
-            </tr>
-
-        </table>
+            </table>
+        </div>
 
         {% if summary.absent_students %}
 
@@ -200,26 +201,26 @@
         {% endif %}
 
         {% else %}
+        <div class="table-responsive-wrapper">
+            <table class="table table-bordered">
 
-        <table class="table table-bordered">
+                <tr>
+                    <th>Total Students</th>
+                    <td>--</td>
+                </tr>
 
-            <tr>
-                <th>Total Students</th>
-                <td>--</td>
-            </tr>
+                <tr>
+                    <th>Present</th>
+                    <td>--</td>
+                </tr>
 
-            <tr>
-                <th>Present</th>
-                <td>--</td>
-            </tr>
+                <tr>
+                    <th>Absent</th>
+                    <td>--</td>
+                </tr>
 
-            <tr>
-                <th>Absent</th>
-                <td>--</td>
-            </tr>
-
-        </table>
-
+            </table>
+        </div>
         {% endif %}
 
     </div>

@@ -74,7 +74,7 @@
                     type="date"
                     name="date"
                     class="form-control"
-                    max="{{ today }}"
+                    max="{{ yesterday }}"
                     required>
 
             </div>
@@ -125,7 +125,7 @@
         <hr class="mt-4">
 
         <h5>Summary for Added Date</h5>
-
+        <div class="table-responsive-wrapper">
         <table class="table table-bordered mt-3">
             <tr>
                 <th>Total Students</th>
@@ -140,6 +140,7 @@
                 <td class="text-danger fw-bold">{{ summary.absent }}</td>
             </tr>
         </table>
+        </div>
 
         {% if summary.absent_students %}
         <strong class="text-danger">Absent Students:</strong>

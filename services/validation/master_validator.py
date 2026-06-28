@@ -155,9 +155,9 @@ class MasterValidator:
 
             value = student["Present Count"]
 
-            if value is None or not isinstance(value, (int, float)) or int(value) != value:
+            if value is None or not isinstance(value, (int, float)) or int(value) != value or value < 0:
                 result.add_error(
-                    f"Row {student['Row']}: Present Count must be an integer."
+                    f"Row {student['Row']}: Present Count must be a non-negative integer."
                 )
 
     def _validate_working_days(self, result):
@@ -166,11 +166,10 @@ class MasterValidator:
 
             value = student["Working Days"]
 
-            if value is None or not isinstance(value, (int, float)) or int(value) != value:
+            if value is None or not isinstance(value, (int, float)) or int(value) != value or value < 0:
                 result.add_error(
-                    f"Row {student['Row']}: Working Days must be an integer."
+                    f"Row {student['Row']}: Working Days must be a non-negative integer."
                 )
-
     # --------------------------------------------------
     # Warning Methods
     # --------------------------------------------------

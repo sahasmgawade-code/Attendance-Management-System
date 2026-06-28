@@ -66,7 +66,7 @@ def process_attendance():
 
             workbook_path = manager.get_registered_workbook()
 
-            workbook_name = os.path.basename(workbook_path)
+            workbook_name = os.path.basename(workbook_path) if workbook_path else "Unknown"
 
             return render_template(
                 "dashboard.html",

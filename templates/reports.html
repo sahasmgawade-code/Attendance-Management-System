@@ -10,13 +10,14 @@
 
     <div class="card-body">
 
-        <a href="{{ url_for('home.home') }}" class="btn btn-outline-secondary mb-4">
-            ← Back to Dashboard
-        </a>
-        <a href="{{ url_for('reports.download_report') }}"
-            class="btn btn-danger mb-4 ms-2">
-            Download PDF Report
-        </a>
+        <div class="d-flex flex-wrap gap-2 mb-4">
+            <a href="{{ url_for('home.home') }}" class="btn btn-outline-secondary">
+                ← Back to Dashboard
+            </a>
+            <a href="{{ url_for('reports.download_report') }}" class="btn btn-danger">
+                Download PDF Report
+            </a>
+        </div>
         <!-- Student Dropdown -->
         <form method="GET" action="{{ url_for('reports.reports') }}">
 
@@ -24,19 +25,14 @@
 
                 <label class="form-label fw-bold">Select Student</label>
 
-                <select
-                    name="urn"
-                    class="form-select"
-                    onchange="this.form.submit()">
+                <select name="urn" class="form-select" onchange="this.form.submit()">
 
                     <option value="">-- Select a Student --</option>
 
                     {% for student in students %}
 
-                    <option
-                        value="{{ student.urn }}"
-                        {% if selected_urn == student.urn|string %}selected{% endif %}
-                        {% if student.defaulter %}style="color: red; font-weight: bold;"{% endif %}>
+                    <option value="{{ student.urn }}" {% if selected_urn==student.urn|string %}selected{% endif %} {% if
+                        student.defaulter %}style="color: red; font-weight: bold;" {% endif %}>
 
                         {{ student.name }}
                         {% if student.defaulter %} {% endif %}
@@ -57,7 +53,8 @@
 
         <div class="card mb-4">
 
-            <div class="card-header {% if selected_student.defaulter %}bg-danger{% else %}bg-success{% endif %} text-white">
+            <div
+                class="card-header {% if selected_student.defaulter %}bg-danger{% else %}bg-success{% endif %} text-white">
                 <h5 class="mb-0">{{ selected_student.name }}</h5>
             </div>
 
@@ -83,7 +80,8 @@
                             </tr>
                             <tr>
                                 <th>Attendance %</th>
-                                <td class="{% if selected_student.defaulter %}text-danger{% else %}text-success{% endif %} fw-bold">
+                                <td
+                                    class="{% if selected_student.defaulter %}text-danger{% else %}text-success{% endif %} fw-bold">
                                     {{ selected_student.attendance }}%
                                 </td>
                             </tr>
@@ -142,24 +140,24 @@
                     datasets: [{
                         data: [
                             {{ selected_student.attendance }},
-                            {{ 100 - selected_student.attendance }}
+                    {{ 100 - selected_student.attendance }}
                         ],
-                        backgroundColor: ['#198754', '#dc3545'],
-                        borderWidth: 2
-                    }]
+                backgroundColor: ['#198754', '#dc3545'],
+                borderWidth: 2
+            }]
                 },
                 options: {
-                    plugins: {
-                        legend: { position: 'bottom' },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return context.label + ': ' + context.parsed.toFixed(2) + '%';
-                                }
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return context.label + ': ' + context.parsed.toFixed(2) + '%';
                             }
                         }
                     }
                 }
+            }
             });
         </script>
 
@@ -171,7 +169,7 @@
         <hr>
 
         <h5 class="text-danger">Defaulters — Below 75%</h5>
-
+        <div class="table-responsive-wrapper">
         <table class="table table-bordered table-hover mt-3">
 
             <thead class="table-danger">
@@ -197,7 +195,7 @@
             </tbody>
 
         </table>
-
+        </div>
         {% endif %}
 
     </div>

@@ -1,29 +1,8 @@
-# Python
+.venv/
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
-*.pdb
-
-# Virtual Environment
-venv/
-env/
-.venv/
-
-# Uploaded Files
-static/
-uploads/
-
-# Logs
+uploads/batches/
+uploads/master/
 logs/
-
-# VS Code
-.vscode/
-
-# Excel temp files
-~$*.xlsx
-~$*.xlsm
-
-# OS
-.DS_Store
-Thumbs.db
+*.log
+config/settings.json

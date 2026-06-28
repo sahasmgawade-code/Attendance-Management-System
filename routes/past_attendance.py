@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from flask import Blueprint
 from flask import render_template
@@ -26,8 +26,8 @@ def past_attendance():
 
     if manager.get_registered_workbook() is None:
         return render_template("upload_master.html")
-
-    today = datetime.now().strftime("%Y-%m-%d")
+    
+    yesterday=(datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
     return render_template(
         "past_attendance.html",
         success=None,
@@ -35,7 +35,7 @@ def past_attendance():
         summary=None,
         unknown_morning=[],
         unknown_afternoon=[],
-        today = today
+        yesterday = yesterday
     )
 
 
@@ -57,7 +57,7 @@ def process_past_attendance():
             summary=None,
             unknown_morning=[],
             unknown_afternoon=[],
-            today=datetime.now().strftime("%Y-%m-%d")            
+            yesterday=(datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")            
         )
 
     # Save uploaded files
@@ -77,7 +77,7 @@ def process_past_attendance():
             summary=None,
             unknown_morning=[],
             unknown_afternoon=[],
-            today=datetime.now().strftime("%Y-%m-%d")            
+            yesterday=(datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")            
         )
 
     morning_file.save(morning_path)
@@ -101,7 +101,7 @@ def process_past_attendance():
             summary=None,
             unknown_morning=[],
             unknown_afternoon=[],
-            today=datetime.now().strftime("%Y-%m-%d")            
+            yesterday=(datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")            
         )
 
     # Date already exists error
@@ -113,7 +113,7 @@ def process_past_attendance():
             summary=None,
             unknown_morning=[],
             unknown_afternoon=[],
-            today=datetime.now().strftime("%Y-%m-%d")            
+            yesterday=(datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")            
         )
 
     # Validation errors
@@ -130,7 +130,7 @@ def process_past_attendance():
             summary=None,
             unknown_morning=[],
             unknown_afternoon=[],
-            today=datetime.now().strftime("%Y-%m-%d")
+            yesterday=(datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
         )
 
     # Success
@@ -141,5 +141,5 @@ def process_past_attendance():
         summary=result.get("summary"),
         unknown_morning=result.get("unknown_morning", []),
         unknown_afternoon=result.get("unknown_afternoon", []),
-            today=datetime.now().strftime("%Y-%m-%d")
+        yesterday=(datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
     )

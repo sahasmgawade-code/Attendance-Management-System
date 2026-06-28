@@ -5,7 +5,6 @@
 
     <meta charset="UTF-8">
     <style>
-
         body {
             background-image: url('{{ url_for("static", filename="images/College Background.png") }}');
             background-size: cover;
@@ -13,11 +12,30 @@
             background-attachment: fixed;
             background-repeat: no-repeat;
         }
+
+        /* Mobile: disable fixed background (causes blank screen on iOS) */
+        @media (max-width: 768px) {
+            body {
+                background-attachment: scroll;
+            }
+        }
+
+        /* Make all tables horizontally scrollable on small screens */
+        .table-responsive-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Prevent buttons from overflowing */
+        .btn {
+            white-space: normal;
+            word-break: break-word;
+        }
     </style>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
 
     <title>Attendance Management System</title>
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/adypu_logo.png') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/ADYPU_LOGO.png') }}">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -31,27 +49,25 @@
     background: rgba(0, 0, 0, 0.5);
     z-index: 0;
 "></div>
-
-    <div class="container mt-4" style="position: relative; z-index: 1;">
+    <div class="container-sm px-3 mt-4" style="position: relative; z-index: 1;">
         <div class="d-flex align-items-center mb-4">
 
-            <img src="{{ url_for('static', filename='images/ADYPU.png') }}" alt="College Logo" width="70" height="70"
-                class="me-3">
+            <img src="{{ url_for('static', filename='images/ADYPU.png') }}" alt="College Logo"
+                class="me-3 flex-shrink-0" style="width: 50px; height: 50px;">
 
             <div>
 
-                <h2 class="mb-0">
-                    Attendance Portal 
+                <h2 class="mb-0 fs-4">
+                    ADYPU Attendance Portal
                 </h2>
 
                 <small class="text-muted">
-                    ABC College
+                    Ajeenkya DY Patil University
                 </small>
 
             </div>
 
         </div>
-
         {% block content %}
         {% endblock %}
 

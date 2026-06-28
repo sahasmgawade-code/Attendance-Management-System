@@ -65,12 +65,11 @@ class ReportService:
         was marked Absent.
         """
 
-        attendance_sheet = WorkbookLoader(
+        loader = WorkbookLoader(
             WorkbookManager().get_registered_workbook()
         )
-        attendance_sheet.load_workbook()
-        sheet = attendance_sheet.get_attendance_sheet()
-
+        loader.load_workbook()
+        sheet = loader.get_attendance_sheet()
         headers = [
             sheet.cell(row=1, column=col).value
             for col in range(1, sheet.max_column + 1)
