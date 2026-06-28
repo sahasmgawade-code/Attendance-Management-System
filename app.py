@@ -1,15 +1,18 @@
+import os
 from flask import Flask
+from dotenv import load_dotenv
 from routes.attendance import attendance_bp
 from config.config import Config
 from routes.home import home_bp
 from routes.reports import reports_bp
 from routes.edit_attendance import edit_bp
 from routes.past_attendance import past_bp
+load_dotenv()
 def create_app():
 
     app = Flask(__name__)
 
-    app.config["SECRET_KEY"] = "attendance-management-system"
+    app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-fallback-key")
 
     settings = Config.load_settings()
 
@@ -28,8 +31,9 @@ app = create_app()
 
 
 if __name__ == "__main__":
+    settings = Config.load_settings()
     app.run(
-        debug=True,
+        debug=settings.get("debug", False),
         host="0.0.0.0",
         port=5000
     )

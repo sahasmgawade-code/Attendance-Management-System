@@ -42,11 +42,16 @@ def upload_master():
     if not file or file.filename == "":
         return render_template("upload_master.html", error="Please select a file to upload.")
 
+    ALLOWED_EXTENSIONS = {".xlsm", ".xlsx"}
+    ext = os.path.splitext(file.filename)[-1].lower()
+
+    if ext not in ALLOWED_EXTENSIONS:
+        return render_template("upload_master.html", error="Invalid file type. Please upload a .xlsm or .xlsx file.")
+
     destination_folder = "uploads/master"
     os.makedirs(destination_folder, exist_ok=True)
     temp_path = os.path.join(destination_folder, file.filename)
     file.save(temp_path)
-
     from openpyxl import load_workbook
     try:
         wb = load_workbook(temp_path, keep_vba=True)
