@@ -56,8 +56,8 @@
 
             <!-- Brand -->
             <a class="navbar-brand d-flex align-items-center" href="{{ url_for('home.home') }}">
-                <img src="{{ url_for('static', filename='images/ADYPU.png') }}"
-                    alt="Logo" width="35" height="35" class="me-2">
+                <img src="{{ url_for('static', filename='images/ADYPU.png') }}" alt="Logo" width="35" height="35"
+                    class="me-2">
                 <div>
                     <div class="fw-bold" style="font-size: 0.95rem; line-height: 1.1;">ADYPU Attendance</div>
                     <div style="font-size: 0.7rem; opacity: 0.7;">Ajeenkya DY Patil University</div>
@@ -65,9 +65,7 @@
             </a>
 
             <!-- Mobile Toggle -->
-            <button class="navbar-toggler" type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#navbarNav">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
@@ -78,28 +76,28 @@
                     <li class="nav-item">
                         <a class="nav-link {% if request.endpoint == 'home.home' %}active{% endif %}"
                             href="{{ url_for('home.home') }}">
-                            🏠 Dashboard
+                            Dashboard
                         </a>
                     </li>
 
                     <li class="nav-item">
                         <a class="nav-link {% if request.endpoint == 'reports.reports' %}active{% endif %}"
                             href="{{ url_for('reports.reports') }}">
-                            📊 Reports
+                            Reports
                         </a>
                     </li>
 
                     <li class="nav-item">
                         <a class="nav-link {% if request.endpoint == 'edit.edit_attendance' %}active{% endif %}"
                             href="{{ url_for('edit.edit_attendance') }}">
-                            ✏️ Edit Attendance
+                            Edit Attendance
                         </a>
                     </li>
 
                     <li class="nav-item">
                         <a class="nav-link {% if request.endpoint == 'past.past_attendance' %}active{% endif %}"
                             href="{{ url_for('past.past_attendance') }}">
-                            📅 Past Attendance
+                            Past Attendance
                         </a>
                     </li>
 

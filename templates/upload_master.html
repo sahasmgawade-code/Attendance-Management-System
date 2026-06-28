@@ -5,7 +5,7 @@
 <div class="card shadow">
 
     <div class="card-header bg-primary text-white">
-        <h4 class="mb-0">📋 Upload Master Workbook</h4>
+        <h4 class="mb-0">Upload Master Workbook</h4>
     </div>
 
     <div class="card-body">
@@ -22,43 +22,31 @@
         <div class="alert alert-info">
             <h6 class="fw-bold">Before uploading, make sure your workbook has:</h6>
             <ul class="mb-0">
-                <li>A sheet named <strong>Student Details</strong> with columns: URN, Student Name, Student Email, Student Phone, Parent Phone, Present Count, Working Days, Attendance %</li>
+                <li>A sheet named <strong>Student Details</strong> with columns: URN, Student Name, Student Email,
+                    Student Phone, Parent Phone, Present Count, Working Days, Attendance %</li>
                 <li>A sheet named <strong>Attendance Details</strong> with columns: URN, Student Name</li>
                 <li>File format: <strong>.xlsx</strong> or <strong>.xlsm</strong></li>
             </ul>
         </div>
 
         <!-- Upload Form -->
-        <form
-            action="{{ url_for('home.upload_master') }}"
-            method="POST"
-            enctype="multipart/form-data"
-            id="uploadForm">
+        <form action="{{ url_for('home.upload_master') }}" method="POST" enctype="multipart/form-data" id="uploadForm">
 
             <div class="mb-4">
                 <label class="form-label fw-bold">Select Master Workbook</label>
 
-                <input
-                    type="file"
-                    name="master_workbook"
-                    class="form-control form-control-lg"
-                    accept=".xlsm,.xlsx"
-                    required
-                    id="fileInput"
-                    onchange="showFileName(this)">
+                <input type="file" name="master_workbook" class="form-control form-control-lg" accept=".xlsm,.xlsx"
+                    required id="fileInput" onchange="showFileName(this)">
 
                 <div class="form-text text-muted">Accepted formats: .xlsx, .xlsm</div>
             </div>
 
             <!-- File preview -->
             <div id="filePreview" class="alert alert-secondary d-none mb-4">
-                📄 Selected: <strong id="selectedFileName"></strong>
+                Selected: <strong id="selectedFileName"></strong>
             </div>
 
-            <button
-                type="submit"
-                class="btn btn-primary btn-lg w-100"
-                id="uploadBtn">
+            <button type="submit" class="btn btn-primary btn-lg w-100" id="uploadBtn">
                 Upload Workbook
             </button>
 
