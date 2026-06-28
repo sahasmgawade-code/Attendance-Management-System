@@ -18,35 +18,76 @@
                 Download PDF Report
             </a>
         </div>
-        <!-- Student Dropdown -->
-        <form method="GET" action="{{ url_for('reports.reports') }}">
+
+                <form method="GET" action="{{ url_for('reports.reports') }}">
 
             <div class="mb-4">
 
-                <label class="form-label fw-bold">Select Student</label>
+                <label class="form-label fw-bold">Search Student</label>
 
-                <select name="urn" class="form-select" onchange="this.form.submit()">
+                <!-- Search Box -->
+                <input
+                    type="text"
+                    id="studentSearch"
+                    class="form-control mb-2"
+                    placeholder="Type name to search..."
+                    onkeyup="filterStudents()"
+                    autocomplete="off">
+
+                <!-- Dropdown -->
+                <select
+                    name="urn"
+                    id="studentSelect"
+                    class="form-select"
+                    onchange="this.form.submit()"
+                    size="5"
+                    style="height: auto;">
 
                     <option value="">-- Select a Student --</option>
 
                     {% for student in students %}
-
-                    <option value="{{ student.urn }}" {% if selected_urn==student.urn|string %}selected{% endif %} {% if
-                        student.defaulter %}style="color: red; font-weight: bold;" {% endif %}>
-
-                        {{ student.name }}
-                        {% if student.defaulter %} {% endif %}
-                        ({{ student.attendance }}%)
-
+                    <option
+                        value="{{ student.urn }}"
+                        data-name="{{ student.name | lower }}"
+                        {% if selected_urn == student.urn|string %}selected{% endif %}
+                        {% if student.defaulter %}style="color: red; font-weight: bold;"{% endif %}>
+                        {{ student.name }} ({{ student.attendance }}%)
+                        {% if student.defaulter %}⚠{% endif %}
                     </option>
-
                     {% endfor %}
 
                 </select>
 
+                <div class="form-text text-muted mt-1">
+                    <span id="studentCount">{{ students|length }}</span> students total.
+                    Red = below 75% attendance.
+                </div>
+
             </div>
 
         </form>
+
+        <script>
+            function filterStudents() {
+                const query = document.getElementById('studentSearch').value.toLowerCase();
+                const select = document.getElementById('studentSelect');
+                const options = select.querySelectorAll('option');
+                let visibleCount = 0;
+
+                options.forEach(option => {
+                    if (!option.value) return; // skip the "-- Select --" option
+                    const name = option.getAttribute('data-name') || '';
+                    if (name.includes(query)) {
+                        option.style.display = '';
+                        visibleCount++;
+                    } else {
+                        option.style.display = 'none';
+                    }
+                });
+
+                document.getElementById('studentCount').textContent = visibleCount;
+            }
+        </script>
 
         <!-- Student Analysis -->
         {% if selected_student %}
