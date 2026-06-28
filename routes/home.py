@@ -73,10 +73,11 @@ def upload_master():
 
 @home_bp.route("/download_workbook")
 def download_workbook():
+    import os
     manager = WorkbookManager()
     workbook_path = manager.get_registered_workbook()
 
-    if workbook_path is None:
+    if workbook_path is None or not os.path.exists(workbook_path):
         return redirect(url_for("home.home"))
 
     return send_file(
