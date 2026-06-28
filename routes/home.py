@@ -3,6 +3,8 @@ from flask import Blueprint, render_template, request, redirect, url_for
 from services.workbook.manager import WorkbookManager
 from services.workbook.loader import WorkbookLoader
 from services.workbook.validator import WorkbookValidator
+from flask import send_file
+
 
 home_bp = Blueprint("home", __name__)
 
@@ -68,3 +70,17 @@ def upload_master():
         json.dump(manager.settings, f, indent=4)
 
     return redirect(url_for("home.home"))
+
+@home_bp.route("/download_workbook")
+def download_workbook():
+    manager = WorkbookManager()
+    workbook_path = manager.get_registered_workbook()
+
+    if workbook_path is None:
+        return redirect(url_for("home.home"))
+
+    return send_file(
+        workbook_path,
+        as_attachment=True,
+        download_name="Master_Workbook.xlsm"
+    )
