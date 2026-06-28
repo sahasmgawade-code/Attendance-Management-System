@@ -1,6 +1,6 @@
 # Attendance Management System
 
-A Flask-based web application for managing student attendance at Ajeenkya DY Patil University.
+A Flask-based web application for managing student attendance.
 
 ## Features
 - Process morning & afternoon batch attendance from CSV files
