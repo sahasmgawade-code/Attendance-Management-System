@@ -30,15 +30,21 @@ def process_attendance():
 
     morning_path = os.path.join(
         BATCH_FOLDER,
-        "morning.csv"
+        "morning.batch"
     )
 
     afternoon_path = os.path.join(
         BATCH_FOLDER,
-        "afternoon.csv"
+        "afternoon.batch"
     )
 
     overwrite = request.form.get("overwrite") == "true"
+    # Collect URN overrides for duplicate names
+    urn_overrides = {}
+    for key, value in request.form.items():
+        if key.startswith("urn_override_"):
+            name = key.replace("urn_override_", "").replace("_", " ")
+            urn_overrides[name.lower()] = value.strip()    
 
     # ------------------------------------------
     # First Request
@@ -47,12 +53,30 @@ def process_attendance():
 
     if not overwrite:
 
-        morning_file = request.files["morning_batch"]
-        afternoon_file = request.files["afternoon_batch"]
+        morning_file = request.files.get("morning_batch")
+        afternoon_file = request.files.get("afternoon_batch")
+
+        if not morning_file or not afternoon_file or morning_file.filename == "" or afternoon_file.filename == "":
+
+            manager = WorkbookManager()
+            workbook_path = manager.get_registered_workbook()
+            workbook_name = os.path.basename(workbook_path) if workbook_path else "Unknown"
+
+            return render_template(
+                "dashboard.html",
+                workbook=workbook_name,
+                success=None,
+                attendance_exists=False,
+                errors=["Please select both the Morning and Afternoon batch files."],
+                unknown_morning=[],
+                unknown_afternoon=[],
+                summary=None,
+                duplicates=[],
+                today=datetime.now().strftime("%A, %d %B %Y")
+            )
 
         morning_file.save(morning_path)
         afternoon_file.save(afternoon_path)
-
     # ------------------------------------------
     # Overwrite Request
     # Reuse Existing Files
@@ -88,16 +112,30 @@ def process_attendance():
 
     workbook_path = manager.get_registered_workbook()
 
+    if workbook_path is None:
+        return render_template(
+            "dashboard.html",
+            workbook="Unknown",
+            success=None,
+            attendance_exists=False,
+            errors=["No master workbook is registered. Please upload one first."],
+            unknown_morning=[],
+            unknown_afternoon=[],
+            summary=None,
+            duplicates=[],
+            today=datetime.now().strftime("%A, %d %B %Y")
+        )
+
     workbook_name = os.path.basename(workbook_path)
 
-    workflow = AttendanceWorkflow()
-    
+    workflow = AttendanceWorkflow()    
     try:
 
         result = workflow.process(
             morning_path,
             afternoon_path,
-            overwrite=overwrite
+            overwrite=overwrite,
+            urn_overrides=urn_overrides
         )
 
     except PermissionError as e:
@@ -111,6 +149,20 @@ def process_attendance():
             unknown_morning=[],
             unknown_afternoon=[],
             summary=None,
+            duplicates=[],
+            today=datetime.now().strftime("%A, %d %B %Y")
+        )
+    if result.get("no_workbook"):
+        return render_template(
+            "dashboard.html",
+            workbook="Unknown",
+            success=None,
+            attendance_exists=False,
+            errors=["No master workbook is registered. Please upload one first."],
+            unknown_morning=[],
+            unknown_afternoon=[],
+            summary=None,
+            duplicates=[],
             today=datetime.now().strftime("%A, %d %B %Y")
         )
 
@@ -130,11 +182,31 @@ def process_attendance():
                 "dashboard.html",
                 workbook=workbook_name,
                 success=None,
-                errors=[ ],
-                attendance_exists = True,
+                errors=[],
+                attendance_exists=True,
                 unknown_morning=[],
                 unknown_afternoon=[],
-                summary = None,
+                summary=None,
+                duplicates=[],
+                today=datetime.now().strftime("%A, %d %B %Y")
+            )
+
+        # --------------------------------------
+        # Duplicate Names Found
+        # --------------------------------------
+
+        if result.get("duplicates_found"):
+
+            return render_template(
+                "dashboard.html",
+                workbook=workbook_name,
+                success=None,
+                errors=[],
+                attendance_exists=False,
+                unknown_morning=[],
+                unknown_afternoon=[],
+                summary=None,
+                duplicates=result.get("duplicates", []),
                 today=datetime.now().strftime("%A, %d %B %Y")
             )
 
@@ -143,14 +215,8 @@ def process_attendance():
         # --------------------------------------
 
         errors = []
-
-        errors.extend(
-            result["morning"].errors
-        )
-
-        errors.extend(
-            result["afternoon"].errors
-        )
+        errors.extend(result["morning"].errors)
+        errors.extend(result["afternoon"].errors)
 
         return render_template(
             "dashboard.html",
@@ -160,8 +226,9 @@ def process_attendance():
             attendance_exists=False,
             unknown_morning=[],
             unknown_afternoon=[],
-            summary = None,
-            today=datetime.now().strftime("%A, %d %B %Y")            
+            summary=None,
+            duplicates=[],
+            today=datetime.now().strftime("%A, %d %B %Y")
         )
     # ------------------------------------------
     # Success
@@ -175,6 +242,7 @@ def process_attendance():
         attendance_exists=False,
         unknown_morning=result.get("unknown_morning", []),
         unknown_afternoon=result.get("unknown_afternoon", []),
-        summary = result.get("summary"),
+        summary=result.get("summary"),
+        duplicates=[],
         today=datetime.now().strftime("%A, %d %B %Y")
     )

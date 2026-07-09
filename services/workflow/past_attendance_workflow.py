@@ -1,11 +1,11 @@
 from datetime import datetime
-
+from config.config import Config
 from services.workbook.manager import WorkbookManager
 from services.workbook.loader import WorkbookLoader
 from services.validation.batch_validator import BatchValidator
 from services.attendance.processor import AttendanceProcessor
 from services.attendance.updater import AttendanceUpdater
-
+from utils.logger import logger
 
 class PastAttendanceWorkflow:
     """
@@ -17,15 +17,17 @@ class PastAttendanceWorkflow:
         self,
         date,
         morning_path,
-        afternoon_path
+        afternoon_path,
+        urn_overrides=None
     ):
 
         # -----------------------------
         # Validate Date Format
         # -----------------------------
+        date_format = Config.get_date_format()
 
         try:
-            datetime.strptime(date, "%d-%m-%Y")
+            datetime.strptime(date, date_format)
         except ValueError:
             return {
                 "success": False,
@@ -36,7 +38,7 @@ class PastAttendanceWorkflow:
         # Block Future Dates
         # -----------------------------
 
-        selected = datetime.strptime(date, "%d-%m-%Y")
+        selected = datetime.strptime(date, date_format)
         today = datetime.now().replace(
             hour=0, minute=0, second=0, microsecond=0
         )
@@ -54,9 +56,14 @@ class PastAttendanceWorkflow:
         manager = WorkbookManager()
         workbook_path = manager.get_registered_workbook()
 
+        if workbook_path is None:
+            return {
+                "success": False,
+                "error": "No master workbook is registered. Please upload one first."
+            }
+
         loader = WorkbookLoader(workbook_path)
         loader.load_workbook()
-
         workbook = loader.get_workbook()
         student_sheet = loader.get_student_sheet()
         attendance_sheet = loader.get_attendance_sheet()
@@ -107,12 +114,12 @@ class PastAttendanceWorkflow:
         morning_result = BatchValidator(
             morning_path,
             student_sheet
-        ).validate()
+        ).validate(urn_overrides=urn_overrides or {})
 
         afternoon_result = BatchValidator(
             afternoon_path,
             student_sheet
-        ).validate()
+        ).validate(urn_overrides=urn_overrides or {})
 
         if not morning_result.is_valid or not afternoon_result.is_valid:
 
@@ -121,6 +128,19 @@ class PastAttendanceWorkflow:
                 "morning": morning_result,
                 "afternoon": afternoon_result,
                 "validation_error": True
+            }
+
+        # Check for duplicates needing URN clarification
+        all_duplicates = (
+            morning_result.duplicates +
+            afternoon_result.duplicates
+        )
+
+        if all_duplicates:
+            return {
+                "success": False,
+                "duplicates_found": True,
+                "duplicates": all_duplicates
             }
 
         unknown_morning = morning_result.warnings
@@ -155,7 +175,10 @@ class PastAttendanceWorkflow:
 
         updater.update()
         updater.save()
-
+        logger.info(
+            f"Past attendance processed for {date}: "
+            f"{len(attendance_result)} students"
+        )
         total = len(attendance_result)
         present = [s for s in attendance_result if s["Status"] == "P"]
         absent = [s for s in attendance_result if s["Status"] == "A"]

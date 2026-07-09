@@ -5,5 +5,8 @@
     "date_format": "%d-%m-%Y",
     "sms_enabled": false,
     "debug": false,
-    "master_workbook": ""
+    "master_workbook": "",
+    "checkin_allowed_networks": [],
+    "checkin_base_url": "",
+    "checkin_wifi_name": "Wi-Fi Name"
 }

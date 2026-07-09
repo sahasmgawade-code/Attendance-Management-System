@@ -4,13 +4,13 @@ from services.validation.batch_validator import BatchValidator
 from services.attendance.processor import AttendanceProcessor
 from services.attendance.updater import AttendanceUpdater
 from datetime import datetime
-
-
+from config.config import Config
+from utils.logger import logger
 class AttendanceWorkflow:
 
     def attendance_exists(self, attendance_sheet):
 
-        today = datetime.now().strftime("%d-%m-%Y")
+        today = datetime.now().strftime(Config.get_date_format())
 
         for col in range(3, attendance_sheet.max_column + 1):
 
@@ -27,16 +27,24 @@ class AttendanceWorkflow:
         self,
         morning_path,
         afternoon_path,
-        overwrite=False
+        overwrite=False,
+        urn_overrides=None
     ):
 
         manager = WorkbookManager()
 
         workbook_path = manager.get_registered_workbook()
 
+        if workbook_path is None:
+            return {
+                "success": False,
+                "morning": None,
+                "afternoon": None,
+                "no_workbook": True
+            }
+
         loader = WorkbookLoader(workbook_path)
         loader.load_workbook()
-
         workbook = loader.get_workbook()
 
         student_sheet = loader.get_student_sheet()
@@ -65,19 +73,31 @@ class AttendanceWorkflow:
         morning_result = BatchValidator(
             morning_path,
             student_sheet
-        ).validate()
+        ).validate(urn_overrides=urn_overrides or {})
 
         afternoon_result = BatchValidator(
             afternoon_path,
             student_sheet
-        ).validate()
-
+        ).validate(urn_overrides=urn_overrides or {})
         if not morning_result.is_valid or not afternoon_result.is_valid:
 
+                    return {
+                        "success": False,
+                        "morning": morning_result,
+                        "afternoon": afternoon_result
+                    }
+
+                # Check for duplicates needing URN clarification
+        all_duplicates = (
+            morning_result.duplicates +
+            afternoon_result.duplicates
+        )
+
+        if all_duplicates:
             return {
                 "success": False,
-                "morning": morning_result,
-                "afternoon": afternoon_result
+                "duplicates_found": True,
+                "duplicates": all_duplicates
             }
         unknown_morning = morning_result.warnings
         unknown_afternoon = afternoon_result.warnings        
@@ -109,6 +129,10 @@ class AttendanceWorkflow:
 
         updater.update()
         updater.save()
+        logger.info(
+            f"Attendance processed for {len(attendance_result)} students "
+            f"(overwrite={overwrite})"
+        )
 
         total = len(attendance_result)
         present = [s for s in attendance_result if s["Status"] == "P"]

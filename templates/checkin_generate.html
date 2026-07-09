@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card shadow">
+
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">QR Check-In — Generate</h4>
+    </div>
+
+    <div class="card-body text-center">
+
+        {% if not base_url_configured %}
+        <div class="alert alert-warning text-start">
+            <strong>Heads up:</strong> <code>checkin_base_url</code> is not set in
+            <code>config/settings.json</code>. The QR code below will not scan correctly
+            until you set it to the LAN IP of the machine running this app
+            (e.g. <code>http://192.168.43.1:5000</code>).
+        </div>
+        {% endif %}
+
+        <img src="data:image/png;base64,{{ qr_base64 }}" alt="Check-in QR Code" class="img-fluid mb-3" style="max-width: 300px;">
+
+        <p class="text-muted">{{ checkin_url }}</p>
+
+        <p>
+            Valid for <strong>{{ duration_minutes }} minutes</strong>.
+            Responses submitted so far: <span id="response-count">0</span>
+        </p>
+
+        <div id="timer" class="fw-bold fs-4 mb-3"></div>
+
+        <a href="{{ url_for('checkin.download', token=token) }}" class="btn btn-outline-primary">
+            Download Responses Now
+        </a>
+
+    </div>
+
+</div>
+
+<script>
+    const expiresAt = {{ expires_at_ms }};
+    const timerEl = document.getElementById("timer");
+    const countEl = document.getElementById("response-count");
+    const token = "{{ token }}";
+    let downloaded = false;
+
+    function updateTimer() {
+        const remaining = expiresAt - Date.now();
+
+        if (remaining <= 0) {
+            timerEl.textContent = "Expired";
+            if (!downloaded) {
+                downloaded = true;
+                window.location.href = "{{ url_for('checkin.download', token=token) }}";
+            }
+            return;
+        }
+
+        const mins = Math.floor(remaining / 60000);
+        const secs = Math.floor((remaining % 60000) / 1000);
+        timerEl.textContent = `${mins}:${secs.toString().padStart(2, "0")} remaining`;
+
+        setTimeout(updateTimer, 1000);
+    }
+
+    function pollCount() {
+        fetch(`/checkin/${token}/status`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.count !== undefined) {
+                    countEl.textContent = data.count;
+                }
+                if (!data.expired) {
+                    setTimeout(pollCount, 3000);
+                }
+            })
+            .catch(() => {});
+    }
+
+    updateTimer();
+    pollCount();
+</script>
+
+{% endblock %}

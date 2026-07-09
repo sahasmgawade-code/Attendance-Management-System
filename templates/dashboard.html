@@ -81,6 +81,44 @@
         </div>
 
         {% endif %}
+{% if duplicates %}
+        <div class="alert alert-warning">
+
+            <h5>⚠️ Duplicate Student Names Found</h5>
+            <p>
+                The following students have duplicate names in the Master Workbook.
+                Please enter the <strong>URN</strong> for each student to continue.
+            </p>
+
+            <form action="{{ url_for('attendance.process_attendance') }}" method="POST">
+                <input type="hidden" name="overwrite" value="{{ 'true' if attendance_exists else 'false' }}">
+
+                {% for dup in duplicates %}
+                <div class="mb-3">
+                    <label class="form-label fw-bold">{{ dup.name }}</label>
+                    <p class="text-muted small mb-1">Possible matches:</p>
+                    <ul class="small mb-2">
+                        {% for match in dup.matches %}
+                        <li>URN: <strong>{{ match.URN }}</strong> — {{ match['Student Name'] }}</li>
+                        {% endfor %}
+                    </ul>
+                    <input
+                        type="text"
+                        name="urn_override_{{ dup.name.replace(' ', '_') }}"
+                        class="form-control"
+                        placeholder="Enter URN for {{ dup.name }}"
+                        required>
+                </div>
+                {% endfor %}
+
+                <button type="submit" class="btn btn-warning w-100">
+                    Continue with URNs
+                </button>
+
+            </form>
+
+        </div>
+        {% endif %}
         {% if attendance_exists %}
 
         <div class="alert alert-warning">

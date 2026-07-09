@@ -8,8 +8,8 @@ class ValidationResult:
         self.is_valid = True
 
         self.errors = []
-
         self.warnings = []
+        self.duplicates = []
 
         self.data = None
 
@@ -22,3 +22,10 @@ class ValidationResult:
     def add_warning(self, message):
 
         self.warnings.append(message)
+
+    def add_duplicate(self, name, matches):
+
+        self.duplicates.append({
+            "name": name,
+            "matches": matches
+        })

@@ -19,3 +19,7 @@ class Config:
 
         with open(cls.SETTINGS_FILE, "r", encoding="utf-8") as file:
             return json.load(file)
+    @classmethod
+    def get_date_format(cls):
+        settings = cls.load_settings()
+        return settings.get("date_format", "%d-%m-%Y")

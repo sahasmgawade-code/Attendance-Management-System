@@ -7,6 +7,7 @@ from routes.home import home_bp
 from routes.reports import reports_bp
 from routes.edit_attendance import edit_bp
 from routes.past_attendance import past_bp
+from routes.checkin import checkin_bp
 load_dotenv()
 def create_app():
 
@@ -23,6 +24,7 @@ def create_app():
     app.register_blueprint(reports_bp)
     app.register_blueprint(edit_bp)
     app.register_blueprint(past_bp)
+    app.register_blueprint(checkin_bp)
        
     return app
 
@@ -35,5 +37,6 @@ if __name__ == "__main__":
     app.run(
         debug=settings.get("debug", False),
         host="0.0.0.0",
+        use_reloader=False,
         port=5000
     )

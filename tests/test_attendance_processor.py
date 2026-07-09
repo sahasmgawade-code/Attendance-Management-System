@@ -67,3 +67,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+def test_attendance_processor_runs():
+    """Smoke test: ensures the processor script runs without raising."""
+    main()

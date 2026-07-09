@@ -1,6 +1,6 @@
 import os
 from datetime import datetime, timedelta
-
+from config.config import Config
 from flask import Blueprint
 from flask import render_template
 from flask import request
@@ -42,13 +42,13 @@ def past_attendance():
 @past_bp.route("/attendance/past", methods=["POST"])
 def process_past_attendance():
 
-    date = request.form.get("date")
+    raw_date = request.form.get("date")
 
     # Convert date from HTML input (yyyy-mm-dd)
-    # to our format (dd-mm-yyyy)
+    # to the workbook's configured storage format
     try:
-        parsed = datetime.strptime(date, "%Y-%m-%d")
-        date = parsed.strftime("%d-%m-%Y")
+        parsed = datetime.strptime(raw_date, "%Y-%m-%d")
+        date = parsed.strftime(Config.get_date_format())
     except (ValueError, TypeError):
         return render_template(
             "past_attendance.html",
@@ -57,31 +57,55 @@ def process_past_attendance():
             summary=None,
             unknown_morning=[],
             unknown_afternoon=[],
-            yesterday=(datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")            
+            duplicates=[],
+            yesterday=(datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
         )
 
-    # Save uploaded files
+    overwrite = request.form.get("overwrite") == "true"
+
+    # Collect URN overrides for duplicate names
+    urn_overrides = {}
+    for key, value in request.form.items():
+        if key.startswith("urn_override_"):
+            name = key.replace("urn_override_", "").replace("_", " ")
+            urn_overrides[name.lower()] = value.strip()
+
     os.makedirs(BATCH_FOLDER, exist_ok=True)
 
     morning_path = os.path.join(BATCH_FOLDER, "morning.csv")
     afternoon_path = os.path.join(BATCH_FOLDER, "afternoon.csv")
 
-    morning_file = request.files.get("morning_batch")
-    afternoon_file = request.files.get("afternoon_batch")
+    if not overwrite:
+        morning_file = request.files.get("morning_batch")
+        afternoon_file = request.files.get("afternoon_batch")
 
-    if not morning_file or not afternoon_file:
-        return render_template(
-            "past_attendance.html",
-            error="Please upload both batch files.",
-            success=None,
-            summary=None,
-            unknown_morning=[],
-            unknown_afternoon=[],
-            yesterday=(datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")            
-        )
+        if not morning_file or not afternoon_file:
+            return render_template(
+                "past_attendance.html",
+                error="Please upload both batch files.",
+                success=None,
+                summary=None,
+                unknown_morning=[],
+                unknown_afternoon=[],
+                duplicates=[],
+                yesterday=(datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+            )
 
-    morning_file.save(morning_path)
-    afternoon_file.save(afternoon_path)
+        morning_file.save(morning_path)
+        afternoon_file.save(afternoon_path)
+
+    else:
+        if not os.path.exists(morning_path) or not os.path.exists(afternoon_path):
+            return render_template(
+                "past_attendance.html",
+                error="Previous batch files were not found. Please upload the files again.",
+                success=None,
+                summary=None,
+                unknown_morning=[],
+                unknown_afternoon=[],
+                duplicates=[],
+                yesterday=(datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+            )
 
     # Run workflow
     workflow = PastAttendanceWorkflow()
@@ -90,7 +114,8 @@ def process_past_attendance():
         result = workflow.process(
             date,
             morning_path,
-            afternoon_path
+            afternoon_path,
+            urn_overrides=urn_overrides
         )
 
     except PermissionError as e:
@@ -101,7 +126,8 @@ def process_past_attendance():
             summary=None,
             unknown_morning=[],
             unknown_afternoon=[],
-            yesterday=(datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")            
+            duplicates=[],
+            yesterday=(datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
         )
 
     # Date already exists error
@@ -113,7 +139,22 @@ def process_past_attendance():
             summary=None,
             unknown_morning=[],
             unknown_afternoon=[],
-            yesterday=(datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")            
+            duplicates=[],
+            yesterday=(datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+        )
+
+# Duplicate names found — ask user to resolve
+    if not result["success"] and result.get("duplicates_found"):
+        return render_template(
+            "past_attendance.html",
+            error=None,
+            success=None,
+            summary=None,
+            unknown_morning=[],
+            unknown_afternoon=[],
+            duplicates=result.get("duplicates", []),
+            selected_date=raw_date,
+            yesterday=(datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
         )
 
     # Validation errors
@@ -130,6 +171,7 @@ def process_past_attendance():
             summary=None,
             unknown_morning=[],
             unknown_afternoon=[],
+            duplicates=[],
             yesterday=(datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
         )
 
@@ -141,5 +183,6 @@ def process_past_attendance():
         summary=result.get("summary"),
         unknown_morning=result.get("unknown_morning", []),
         unknown_afternoon=result.get("unknown_afternoon", []),
+        duplicates=[],
         yesterday=(datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
     )

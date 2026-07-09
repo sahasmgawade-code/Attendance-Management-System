@@ -5,7 +5,7 @@ from services.workbook.loader import WorkbookLoader
 from services.workbook.validator import WorkbookValidator
 from datetime import datetime
 from flask import send_file
-
+from werkzeug.utils import secure_filename
 
 home_bp = Blueprint("home", __name__)
 
@@ -50,7 +50,8 @@ def upload_master():
 
     destination_folder = "uploads/master"
     os.makedirs(destination_folder, exist_ok=True)
-    temp_path = os.path.join(destination_folder, file.filename)
+    safe_filename = secure_filename(file.filename)
+    temp_path = os.path.join(destination_folder, safe_filename)
     file.save(temp_path)
     from openpyxl import load_workbook
     try:
@@ -69,8 +70,11 @@ def upload_master():
     manager = WorkbookManager()
 
     # File is already saved in uploads/master — register it directly
-    # without copying (avoids Windows file lock error)
-    manager.settings["master_workbook"] = temp_path
+    # without copying (avoids Windows file lock error).
+    # Store as a forward-slash path so settings.json stays
+    # portable across Windows, Linux, and Mac.
+    from pathlib import Path
+    manager.settings["master_workbook"] = Path(temp_path).as_posix()
 
     import json
     with open(manager.settings_path, "w", encoding="utf-8") as f:

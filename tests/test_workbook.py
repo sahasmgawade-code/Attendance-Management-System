@@ -37,3 +37,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+def test_workbook_validation_runs():
+    """Smoke test: ensures the workbook validation script runs without raising."""
+    main()

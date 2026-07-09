@@ -6,19 +6,19 @@ from models.validation import ValidationResult
 class BatchValidator:
     """
     Validates a Morning/Afternoon batch file against
-    the Master Workbook.
+    the Master Workbook. Matching is done strictly by URN.
     """
-
-    REQUIRED_COLUMN = "Participant Name"
 
     def __init__(self, batch_file_path, student_sheet):
         self.batch_file_path = batch_file_path
         self.student_sheet = student_sheet
 
-        self.master_students = {}
-        self.batch_students = set()
+        self.master_by_urn = {}
 
-    def validate(self) -> ValidationResult:
+    def validate(self, urn_overrides=None) -> ValidationResult:
+        # urn_overrides is accepted for backward compatibility with
+        # existing callers, but is no longer used now that matching
+        # is strictly URN-based (no ambiguity to resolve).
 
         result = ValidationResult()
 
@@ -26,11 +26,14 @@ class BatchValidator:
 
         try:
 
-            if self.batch_file_path.lower().endswith(".csv"):
-                df = pd.read_csv(self.batch_file_path)
+            with open(self.batch_file_path, "rb") as f:
+                signature = f.read(4)
 
-            else:
+            # .xlsx/.xlsm files are ZIP archives and start with "PK"
+            if signature[:2] == b"PK":
                 df = pd.read_excel(self.batch_file_path)
+            else:
+                df = pd.read_csv(self.batch_file_path)
 
         except Exception as e:
 
@@ -41,53 +44,40 @@ class BatchValidator:
             result.add_error("Batch file is empty.")
             return result
 
-        if self.REQUIRED_COLUMN not in df.columns:
+        if "URN" not in df.columns:
             result.add_error(
-                f"Required column '{self.REQUIRED_COLUMN}' not found."
+                "Batch file must contain a 'URN' column. "
+                "Name-based matching is no longer supported."
             )
             return result
 
         matched_students = []
+        seen_urns = set()
 
-        for name in df[self.REQUIRED_COLUMN]:
+        for value in df["URN"]:
 
-            if pd.isna(name):
+            if pd.isna(value):
                 continue
 
-            normalized = self._normalize_name(name)
+            urn = str(value).strip()
 
-            # Ignore duplicate joins
-            if normalized in self.batch_students:
+            if not urn:
                 continue
 
-            self.batch_students.add(normalized)
+            if urn in seen_urns:
+                continue
 
-            # Student not found — check if all words are a subset of any master name
-            matched_key = None
+            seen_urns.add(urn)
 
-            for master_key in self.master_students:
-                if normalized <= master_key:
-                    matched_key = master_key
-                    break
+            student = self.master_by_urn.get(urn)
 
-            if matched_key is None:
-
+            if student is None:
                 result.add_warning(
-                    f"Student '{name}' not found in Master Data."
+                    f"URN '{urn}' not found in Master Data."
                 )
                 continue
 
-            matches = self.master_students[matched_key]
-
-            # Duplicate student names in master
-            if len(matches) > 1:
-
-                result.add_error(
-                    f"Multiple students found with name '{name}'."
-                )
-                continue
-
-            matched_students.append(matches[0])
+            matched_students.append(student)
 
         result.data = matched_students
 
@@ -111,18 +101,7 @@ class BatchValidator:
 
             student = dict(zip(headers, row))
 
-            normalized = self._normalize_name(
-                student["Student Name"]
-            )
+            urn = str(student.get("URN", "")).strip()
 
-            self.master_students.setdefault(
-                normalized,
-                []
-            ).append(student)
-
-    # ---------------------------------------------------------
-
-    @staticmethod
-    def _normalize_name(name):
-        words = str(name).strip().lower().split()
-        return frozenset(words)
+            if urn:
+                self.master_by_urn[urn] = student

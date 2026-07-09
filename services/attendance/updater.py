@@ -1,5 +1,5 @@
+from config.config import Config
 from datetime import datetime
-
 
 class AttendanceUpdater:
     """
@@ -167,7 +167,7 @@ class AttendanceUpdater:
         today = getattr(
             self,
             "_target_date",
-            datetime.now().strftime("%d-%m-%Y")
+            datetime.now().strftime(Config.get_date_format())
         )
         for col in range(3, self.attendance_sheet.max_column + 1):
 

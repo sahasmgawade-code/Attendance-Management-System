@@ -14,23 +14,26 @@ class AttendanceProcessor:
 
         attendance_result = []
 
-        # Create lookup sets for fast searching
-        morning_set = {
-            self._normalize(student["Student Name"])
+        # Match by URN, not name, so duplicate-named
+        # students are never conflated with each other
+        morning_urns = {
+            str(student["URN"]).strip()
             for student in self.morning_students
+            if student.get("URN") not in (None, "")
         }
 
-        afternoon_set = {
-            self._normalize(student["Student Name"])
+        afternoon_urns = {
+            str(student["URN"]).strip()
             for student in self.afternoon_students
+            if student.get("URN") not in (None, "")
         }
 
         for student in self.master_students:
 
-            name = self._normalize(student["Student Name"])
+            urn = str(student.get("URN", "")).strip()
 
-            present_morning = name in morning_set
-            present_afternoon = name in afternoon_set
+            present_morning = urn in morning_urns
+            present_afternoon = urn in afternoon_urns
 
             status = "P" if (present_morning and present_afternoon) else "A"
 
@@ -42,9 +45,3 @@ class AttendanceProcessor:
             )
 
         return attendance_result
-
-    @staticmethod
-    def _normalize(name):
-
-        words = str(name).strip().lower().split()
-        return frozenset(words)

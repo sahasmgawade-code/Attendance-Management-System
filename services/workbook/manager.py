@@ -55,7 +55,9 @@ class WorkbookManager:
 
         shutil.copy2(source_path, destination)
 
-        self.settings["master_workbook"] = str(destination)
+        # Store as a forward-slash path so settings.json stays
+        # portable across Windows, Linux, and Mac
+        self.settings["master_workbook"] = destination.as_posix()
 
         with open(self.settings_path, "w", encoding="utf-8") as file:
             json.dump(self.settings, file, indent=4)

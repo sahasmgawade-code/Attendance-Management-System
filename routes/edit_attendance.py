@@ -1,5 +1,5 @@
 from datetime import datetime
-
+from config.config import Config
 from flask import Blueprint, render_template, request, redirect, url_for
 from services.attendance.editor import AttendanceEditor
 from services.workbook.manager import WorkbookManager
@@ -8,20 +8,19 @@ edit_bp = Blueprint("edit", __name__)
 
 
 def to_picker(date_str):
-    """Convert dd-mm-yyyy to yyyy-mm-dd for the HTML date input."""
+    """Convert the workbook's stored date format to yyyy-mm-dd for the HTML date input."""
     try:
-        return datetime.strptime(date_str, "%d-%m-%Y").strftime("%Y-%m-%d")
+        return datetime.strptime(date_str, Config.get_date_format()).strftime("%Y-%m-%d")
     except (ValueError, TypeError):
         return ""
 
 
 def from_picker(date_str):
-    """Convert yyyy-mm-dd to dd-mm-yyyy to match workbook dates."""
+    """Convert yyyy-mm-dd from the date input to the workbook's stored date format."""
     try:
-        return datetime.strptime(date_str, "%Y-%m-%d").strftime("%d-%m-%Y")
+        return datetime.strptime(date_str, "%Y-%m-%d").strftime(Config.get_date_format())
     except (ValueError, TypeError):
         return ""
-
 
 @edit_bp.route("/attendance/edit", methods=["GET"])
 def edit_attendance():
@@ -80,6 +79,9 @@ def save_attendance():
         editor = AttendanceEditor()
         editor.save_edits(selected_date, edits)
         return redirect(url_for("edit.edit_attendance", date=selected_date, success="true"))
+
+    except FileNotFoundError:
+        return render_template("upload_master.html")
 
     except PermissionError as e:
         editor = AttendanceEditor()

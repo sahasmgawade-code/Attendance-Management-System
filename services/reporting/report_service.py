@@ -11,7 +11,10 @@ class ReportService:
     def __init__(self):
         manager = WorkbookManager()
         workbook_path = manager.get_registered_workbook()
-
+        if workbook_path is None:
+            raise FileNotFoundError(
+                "No master workbook is registered. Please upload one first."
+            )
         loader = WorkbookLoader(workbook_path)
         loader.load_workbook()
 

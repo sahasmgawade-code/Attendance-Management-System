@@ -1,15 +1,18 @@
 .venv/
 __pycache__/
 *.pyc
-uploads/batches/
-uploads/master/
+
+uploads/
 logs/
 *.log
+
 config/settings.json
-Attendance Report - SLOT1 (22-Jun-2026).csv
-Attendance Report - SLOT1 (22-Jun-2026) - Copy.csv
-Attendance Report - SLOT2 (22-Jun-2026).csv
-AttendanceManagementSystem.zip
-Sample Data.xlsm
-Attendance Files/
 .env
+
+Attendance Files/
+
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+tests/

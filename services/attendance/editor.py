@@ -1,6 +1,6 @@
 from services.workbook.manager import WorkbookManager
 from services.workbook.loader import WorkbookLoader
-
+from utils.logger import logger
 
 class AttendanceEditor:
     """
@@ -13,6 +13,10 @@ class AttendanceEditor:
         manager = WorkbookManager()
         workbook_path = manager.get_registered_workbook()
 
+        if workbook_path is None:
+            raise FileNotFoundError(
+                "No master workbook is registered. Please upload one first."
+            )
         self.loader = WorkbookLoader(workbook_path)
         self.loader.load_workbook()
 
@@ -177,8 +181,8 @@ class AttendanceEditor:
         # Save workbook
         try:
             self.workbook.save(self.workbook_path)
+            logger.info(f"Attendance edited for {date}: {len(edits)} records updated")
             return True
-
         except PermissionError:
             raise PermissionError(
                 "The master workbook is currently open.\n"

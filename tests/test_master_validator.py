@@ -37,3 +37,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+def test_master_validator_runs():
+    """Smoke test: ensures the master validator script runs without raising."""
+    main()    

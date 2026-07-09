@@ -4,3 +4,4 @@ pandas==3.0.3
 reportlab
 gunicorn
 python-dotenv
+qrcode[pil]

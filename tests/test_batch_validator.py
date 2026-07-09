@@ -53,3 +53,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+def test_batch_validator_runs():
+    """Smoke test: ensures the batch validator script runs without raising."""
+    main()
