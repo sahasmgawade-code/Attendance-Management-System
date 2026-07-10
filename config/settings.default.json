@@ -6,7 +6,7 @@
     "sms_enabled": false,
     "debug": false,
     "master_workbook": "",
-    "checkin_allowed_networks": [],
-    "checkin_base_url": "",
-    "checkin_wifi_name": "Wi-Fi Name"
+    "checkin_allowed_networks": ["42.104.227.8/32"],
+    "checkin_base_url": "https://attendance-management-system-xkh7.onrender.com",
+    "checkin_wifi_name": "Sahas Gawade (Realme 8)"
 }
