@@ -2,7 +2,7 @@ import threading
 import uuid
 from datetime import datetime, timedelta
 
-SESSION_DURATION_MINUTES = 5
+SESSION_DURATION_MINUTES = 8
 MAX_ENTRIES_PER_DEVICE = 2
 
 _lock = threading.Lock()
