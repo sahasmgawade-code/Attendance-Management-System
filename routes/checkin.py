@@ -16,7 +16,7 @@ from services.checkin.session_manager import (
     SESSION_DURATION_MINUTES,
     MAX_ENTRIES_PER_DEVICE
 )
-from services.checkin.network_check import get_client_ip, is_ip_allowed
+from services.checkin.network_check import get_client_ip
 from services.checkin.excel_export import generate_excel_bytes
 from datetime import datetime
 
@@ -72,14 +72,6 @@ def checkin_form(token):
 
     client_ip = get_client_ip(request)
 
-    if not is_ip_allowed(client_ip):
-        return render_template(
-            "checkin_form.html",
-            error="wifi",
-            wifi_name=_wifi_name(),
-            token=token
-        )
-
     resp = make_response(render_template("checkin_form.html", error=None, token=token))
 
     if not request.cookies.get(DEVICE_COOKIE_NAME):
@@ -100,14 +92,6 @@ def checkin_submit(token):
         return render_template("checkin_form.html", error="expired", token=token)
 
     client_ip = get_client_ip(request)
-
-    if not is_ip_allowed(client_ip):
-        return render_template(
-            "checkin_form.html",
-            error="wifi",
-            wifi_name=_wifi_name(),
-            token=token
-        )
 
     device_id = request.cookies.get(DEVICE_COOKIE_NAME)
 
