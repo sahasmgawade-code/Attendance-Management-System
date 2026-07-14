@@ -19,7 +19,6 @@ def generate_excel_bytes(session):
     for response in session["responses"]:
         full_name = " ".join([
             response["first_name"],
-            response["middle_name"],
             response["last_name"]
         ])
 

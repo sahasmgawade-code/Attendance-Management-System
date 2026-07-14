@@ -110,10 +110,9 @@ def checkin_submit(token):
 
     urn = request.form.get("urn", "").strip()
     first_name = request.form.get("first_name", "").strip()
-    middle_name = request.form.get("middle_name", "").strip()
     last_name = request.form.get("last_name", "").strip()
 
-    if not urn or not first_name or not middle_name or not last_name:
+    if not urn or not first_name or not last_name:
         resp = make_response(render_template(
             "checkin_form.html",
             error="missing_fields",
@@ -145,7 +144,6 @@ def checkin_submit(token):
     record_submission(session, device_id, {
         "urn": urn,
         "first_name": first_name,
-        "middle_name": middle_name,
         "last_name": last_name,
         "submitted_at": datetime.now(),
         "device_ip": client_ip
