@@ -6,11 +6,12 @@ from services.workbook.validator import WorkbookValidator
 from datetime import datetime
 from flask import send_file
 from werkzeug.utils import secure_filename
-
+from utils.auth import login_required
 home_bp = Blueprint("home", __name__)
 
 
 @home_bp.route("/")
+@login_required
 def home():
     manager = WorkbookManager()
     workbook = manager.get_registered_workbook()
@@ -32,6 +33,7 @@ def home():
 
 
 @home_bp.route("/upload_master", methods=["GET","POST"])
+@login_required
 def upload_master():
 
     if request.method == "GET":
@@ -83,6 +85,7 @@ def upload_master():
     return redirect(url_for("home.home"))
 
 @home_bp.route("/download_workbook")
+@login_required
 def download_workbook():
     import os
     manager = WorkbookManager()

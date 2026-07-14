@@ -3,7 +3,7 @@ from config.config import Config
 from flask import Blueprint, render_template, request, redirect, url_for
 from services.attendance.editor import AttendanceEditor
 from services.workbook.manager import WorkbookManager
-
+from utils.auth import login_required
 edit_bp = Blueprint("edit", __name__)
 
 
@@ -23,6 +23,7 @@ def from_picker(date_str):
         return ""
 
 @edit_bp.route("/attendance/edit", methods=["GET"])
+@login_required
 def edit_attendance():
 
     manager = WorkbookManager()
@@ -66,6 +67,7 @@ def edit_attendance():
 
 
 @edit_bp.route("/attendance/edit", methods=["POST"])
+@login_required
 def save_attendance():
 
     selected_date = request.form.get("date")

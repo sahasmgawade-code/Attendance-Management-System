@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card shadow">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">Today's Attendance — {{ today }}</h4>
+    </div>
+    <div class="card-body">
+
+        {% if not students %}
+        <div class="alert alert-info">
+            No attendance has been marked for today yet.
+        </div>
+        {% else %}
+
+        <div class="d-flex gap-3 mb-3">
+            <span class="badge bg-success fs-6">Present: {{ present_count }}</span>
+            <span class="badge bg-danger fs-6">Absent: {{ absent_count }}</span>
+        </div>
+
+        <div class="table-responsive-wrapper">
+            <table class="table table-bordered table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>URN</th>
+                        <th>Student Name</th>
+                        <th class="text-center">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr class="{% if student.status == 'A' %}table-danger{% else %}table-success{% endif %}">
+                        <td>{{ student.urn }}</td>
+                        <td>{{ student.name }}</td>
+                        <td class="text-center">
+                            {{ "Present" if student.status == "P" else "Absent" }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

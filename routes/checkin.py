@@ -3,7 +3,7 @@ import uuid
 from io import BytesIO
 from services.checkin.urn_lookup import get_valid_urns
 from flask import Blueprint, render_template, request, send_file, make_response
-
+from utils.auth import login_required
 import qrcode
 
 from config.config import Config
@@ -32,6 +32,7 @@ def _wifi_name():
 
 
 @checkin_bp.route("/checkin/generate", methods=["GET"])
+@login_required
 def generate():
 
     session = create_session()
@@ -157,6 +158,7 @@ def checkin_submit(token):
 
 
 @checkin_bp.route("/checkin/<token>/download", methods=["GET"])
+@login_required
 def download(token):
 
     session = get_session(token)
@@ -177,6 +179,7 @@ def download(token):
 
 
 @checkin_bp.route("/checkin/<token>/status", methods=["GET"])
+@login_required
 def status(token):
 
     session = get_session(token)

@@ -6,7 +6,7 @@ from flask import render_template
 from flask import request
 from flask import redirect
 from flask import url_for
-
+from utils.auth import login_required
 from services.workflow.past_attendance_workflow import PastAttendanceWorkflow
 from services.workbook.manager import WorkbookManager
 
@@ -20,6 +20,7 @@ BATCH_FOLDER = "uploads/batches/past"
 
 
 @past_bp.route("/attendance/past", methods=["GET"])
+@login_required
 def past_attendance():
 
     manager = WorkbookManager()
@@ -40,6 +41,7 @@ def past_attendance():
 
 
 @past_bp.route("/attendance/past", methods=["POST"])
+@login_required
 def process_past_attendance():
 
     raw_date = request.form.get("date")

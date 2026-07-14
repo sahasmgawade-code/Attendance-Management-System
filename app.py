@@ -8,12 +8,19 @@ from routes.reports import reports_bp
 from routes.edit_attendance import edit_bp
 from routes.past_attendance import past_bp
 from routes.checkin import checkin_bp
+from routes.auth import auth_bp
+from datetime import timedelta
 load_dotenv()
 def create_app():
 
     app = Flask(__name__)
 
     app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-fallback-key")
+
+    app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=365)
+    app.config["SESSION_COOKIE_HTTPONLY"] = True
+    app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+    app.config["SESSION_COOKIE_SECURE"] = bool(os.environ.get("RENDER"))
 
     settings = Config.load_settings()
 
@@ -25,7 +32,7 @@ def create_app():
     app.register_blueprint(edit_bp)
     app.register_blueprint(past_bp)
     app.register_blueprint(checkin_bp)
-       
+    app.register_blueprint(auth_bp)
     return app
 
 

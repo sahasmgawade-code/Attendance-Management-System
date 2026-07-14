@@ -100,12 +100,23 @@
                             Past Attendance
                         </a>
                     </li>
-                                        <li class="nav-item">
+                    <li class="nav-item">
                         <a class="nav-link {% if request.endpoint == 'checkin.generate' %}active{% endif %}"
                             href="{{ url_for('checkin.generate') }}">
                             Generate QR
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'reports.today_attendance' %}active{% endif %}"
+                        href="{{ url_for('reports.today_attendance') }}">
+                        Today's Attendance
+                    </a>
+                </li>
+                {% if session.get('logged_in') %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
+                </li>
+                {% endif %}
 
                 </ul>
 

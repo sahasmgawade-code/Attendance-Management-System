@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import Blueprint
 from flask import request
 from flask import render_template
-
+from utils.auth import login_required
 from services.workbook.manager import WorkbookManager
 from services.workflow.attendance_workflow import AttendanceWorkflow
 
@@ -20,6 +20,7 @@ BATCH_FOLDER = "uploads/batches"
     "/attendance/process",
     methods=["POST"]
 )
+@login_required
 def process_attendance():
 
     # ------------------------------------------
